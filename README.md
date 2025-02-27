@@ -1,6 +1,6 @@
-# ZCCL
+# CCCL
 
-Collective communication library with highly optimized compression on GPUs. 
+Collective Communication Library with highly optimized Compression on GPUs. 
 
 ## References
 - Huang, J., Di, S., Yu, X., Zhai, Y., Liu, J., Huang, Y., Raffenetti, K., Zhou, H., Zhao, K., Lu, X. and Chen, Z., 2024, May. gzccl: Compression-accelerated collective communication framework for gpu clusters. In Proceedings of the 38th ACM International Conference on Supercomputing (pp. 437-448).
