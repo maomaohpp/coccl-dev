@@ -1,18 +1,18 @@
-# CoCCL Tests
+# COCCL Tests
 
-These tests check both the performance and the correctness of [CoCCL](https://github.com/hpdps-group/COCCL) operations. This is an extension to CoCCL from [nccl-tests](https://github.com/nvidia/nccl-tests).
+These tests check both the performance and the correctness of [COCCL](https://github.com/hpdps-group/coccl) operations. This is an extension to COCCL from [nccl-tests](https://github.com/nvidia/nccl-tests).
 
 ## Build
 
 To build the tests, just type `make`.
 
-If CUDA is not installed in /usr/local/cuda, you may specify CUDA\_HOME. Similarly, if CoCCL is not installed in /usr, you may specify NCCL\_HOME.
+If CUDA is not installed in /usr/local/cuda, you may specify CUDA\_HOME. Similarly, if COCCL is not installed in /usr, you may specify NCCL\_HOME.
 
 ```shell
 $ make CUDA_HOME=/path/to/cuda NCCL_HOME=/path/to/coccl
 ```
 
-CoCCL tests rely on MPI to work on multiple processes, hence multiple nodes. If you want to compile the tests with MPI support, you need to set MPI=1 and set MPI\_HOME to the path where MPI is installed.
+COCCL tests rely on MPI to work on multiple processes, hence multiple nodes. If you want to compile the tests with MPI support, you need to set MPI=1 and set MPI\_HOME to the path where MPI is installed.
 
 ```shell
 $ make MPI=1 MPI_HOME=/path/to/mpi CUDA_HOME=/path/to/cuda NCCL_HOME=/path/to/coccl
@@ -20,7 +20,7 @@ $ make MPI=1 MPI_HOME=/path/to/mpi CUDA_HOME=/path/to/cuda NCCL_HOME=/path/to/co
 
 ## Usage
 
-CoCCL tests can run on multiple processes, multiple threads, and multiple CUDA devices per thread. The number of process is managed by MPI and is therefore not passed to the tests as argument. The total number of ranks (=CUDA devices) will be equal to (number of processes)\*(number of threads)\*(number of GPUs per thread).
+COCCL tests can run on multiple processes, multiple threads, and multiple CUDA devices per thread. The number of process is managed by MPI and is therefore not passed to the tests as argument. The total number of ranks (=CUDA devices) will be equal to (number of processes)\*(number of threads)\*(number of GPUs per thread).
 
 ### Quick examples
 
@@ -53,7 +53,7 @@ All tests support the same set of arguments :
   * Increments can be either fixed or a multiplication factor. Only one of those should be used
     * `-i,--stepbytes <increment size>` fixed increment between sizes. Default : 1M.
     * `-f,--stepfactor <increment factor>` multiplication factor between sizes. Default : disabled.
-* CoCCL operations arguments
+* COCCL operations arguments
   * `-o,--op <sum/prod/min/max/avg/all>` Specify which reduction operation to perform. Only relevant for reduction operations like Allreduce, Reduce or ReduceScatter. Default : Sum.
   * `-d,--datatype <nccltype/all>` Specify which datatype to use. Default : Float.
   * `-r,--root <root/all>` Specify which root to use. Only for operations with a root like broadcast or reduce. Default : 0.
@@ -64,9 +64,9 @@ All tests support the same set of arguments :
   * `-N,--run_cycles <cycle count>` run & print each cycle. Default : 1; 0=infinite.
   * `-a,--average <0/1/2/3>` Report performance as an average across all ranks (MPI=1 only). <0=Rank0,1=Avg,2=Min,3=Max>. Default : 1.
 * Test operation
-  * `-p,--parallel_init <0/1>` use threads to initialize CoCCL in parallel. Default : 0.
+  * `-p,--parallel_init <0/1>` use threads to initialize COCCL in parallel. Default : 0.
   * `-c,--check <check iteration count>` perform count iterations, checking correctness of results on each iteration. This can be quite slow on large numbers of GPUs. Default : 1.
-  * `-z,--blocking <0/1>` Make CoCCL collective blocking, i.e. have CPUs wait and sync after each collective. Default : 0.
+  * `-z,--blocking <0/1>` Make COCCL collective blocking, i.e. have CPUs wait and sync after each collective. Default : 0.
   * `-G,--cudagraph <num graph launches>` Capture iterations as a CUDA graph and then replay specified number of times. Default : 0.
   * `-C,--report_cputime <0/1>]` Report CPU time instead of latency. Default : 0.
   * `-R,--local_register <1/0>` enable local buffer registration on send/recv buffers. Default : 0.
