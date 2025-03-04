@@ -10,7 +10,7 @@ For instance, leveraging the minmaxUint8 quantization algorithm, COCCL achieves 
 
 Moving forward, we plan to incorporate NVSHMEM support by migrating dependencies from [DeepEP](https://github.com/deepseek-ai/DeepEP) and integrating selected optimization mechanisms to further enhance COCCL's communication performance.
 
-(C) 2025 by Institute of Computing Technology, Chinese Academy of Sciences. See [COPYRIGHT](https://github.com/hpdps-group/coccl/LICENSE) in top-level directory.
+(C) 2025 by Institute of Computing Technology, Chinese Academy of Sciences. See [COPYRIGHT](https://github.com/hpdps-group/coccl/LICENSE.txt) in top-level directory.
 
 - Developers:  Xingchen Liu, Haoran Kong, Zheng Wei, Liyang Zhao, Yufan Wang, Jingwu Yang
 - Advisors: [Dingwen Tao](https://www.dingwentao.com/), [Guangming Tan](https://tanniu.github.io/)
