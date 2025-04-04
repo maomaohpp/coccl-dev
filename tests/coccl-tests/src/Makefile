@@ -17,7 +17,6 @@ CUDARTLIB ?= cudart
 CUDA_VERSION = $(strip $(shell which $(NVCC) >/dev/null && $(NVCC) --version | grep release | sed 's/.*release //' | sed 's/\,.*//'))
 CUDA_MAJOR = $(shell echo $(CUDA_VERSION) | cut -d "." -f 1)
 CUDA_MINOR = $(shell echo $(CUDA_VERSION) | cut -d "." -f 2)
-
 # Better define NVCC_GENCODE in your environment to the minimal set
 # of archs to reduce compile time.
 ifeq ($(shell test "0$(CUDA_MAJOR)" -eq 12 -a "0$(CUDA_MINOR)" -ge 8 -o "0$(CUDA_MAJOR)" -ge 13; echo $$?),0)
@@ -91,10 +90,11 @@ NVLDFLAGS += $(LIBRARIES:%=-l%)
 DST_DIR := $(BUILDDIR)
 SRC_FILES := $(wildcard *.cu)
 OBJ_FILES := $(SRC_FILES:%.cu=${DST_DIR}/%.o)
-BIN_FILES_LIST := \
-	all_reduce all_gather broadcast reduce_scatter reduce alltoall scatter gather sendrecv hypercube \
-	alltoall_comp alltoall_p2p reduce_scatter_ring reduce_scatter_comp all_gather_comp all_gather_ring \
-	all_gather_comp_ring all_reduce_ring all_reduce_comp_ring
+BIN_FILES_LIST := all_reduce all_gather broadcast reduce_scatter reduce alltoall scatter gather sendrecv hypercube \
+alltoall_comp alltoall_p2p reduce_scatter_ring reduce_scatter_comp all_gather_comp all_gather_ring all_gather_comp_ring \
+all_reduce_oneShot all_reduce_twoShotall all_reduce_twoShotr0 all_reduce_ring all_reduce_optim all_reduce_comp_ring \
+all_reduce_comp_twoShotall all_reduce_comp_twoShotr0 all_reduce_comp_oneShot all_reduce_comp_optim alltoall_commMS_compMS \
+reduce_scatter_comp_oneshot reduce_scatter_comp_twoshot all_gather_comp_twoshot
 BIN_FILES := $(BIN_FILES_LIST:%=${DST_DIR}/%_perf)
 
 build: ${BIN_FILES}

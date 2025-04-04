@@ -84,46 +84,49 @@ __device__ void warpReduce(volatile T* smin, volatile T* smax, const int tid, co
     }
 }
 
-// template<typename T>
-// __device__ void warpShuffleMinMax(T &localMin, T &localMax, unsigned int mask, int blockSize){
-//     if(blockSize >= 32){
-//         T tMax = __shfl_down_sync(mask, localMax, 16);
-//         T tMin = __shfl_down_sync(mask, localMin, 16);
-//         localMin = localMin < tMin ? localMin : tMin;
-//         localMax = localMax > tMax ? localMax : tMax;
-//     }
-//     if(blockSize >= 16){
-//         T tMin = __shfl_down_sync(mask, localMin, 8);
-//         T tMax = __shfl_down_sync(mask, localMax, 8);
-//         localMin = localMin < tMin ? localMin : tMin;
-//         localMax = localMax > tMax ? localMax : tMax;
-//     }
-//     if(blockSize >= 8){
-//         T tMin = __shfl_down_sync(mask, localMin, 4);
-//         T tMax = __shfl_down_sync(mask, localMax, 4);
-//         localMin = localMin < tMin ? localMin : tMin;
-//         localMax = localMax > tMax ? localMax : tMax;
-//     } 
-//     if(blockSize >= 4){
-//         T tMin = __shfl_down_sync(mask, localMin, 2);
-//         T tMax = __shfl_down_sync(mask, localMax, 2);
-//         localMin = localMin < tMin ? localMin : tMin;
-//         localMax = localMax > tMax ? localMax : tMax;
-//     } 
-//     if(blockSize >= 2){
-//         T tMin = __shfl_down_sync(mask, localMin, 1);
-//         T tMax = __shfl_down_sync(mask, localMax, 1);
-//         localMin = localMin < tMin ? localMin : tMin;
-//         localMax = localMax > tMax ? localMax : tMax;
-//     } 
-// }
-
 template<typename T>
+__device__ void warpShuffleMinMax(T &localMin, T &localMax, unsigned int mask, int blockSize){
+    if(blockSize >= 32){
+        T tMax = __shfl_down_sync(mask, localMax, 16);
+        T tMin = __shfl_down_sync(mask, localMin, 16);
+        localMin = localMin < tMin ? localMin : tMin;
+        localMax = localMax > tMax ? localMax : tMax;
+    }
+    if(blockSize >= 16){
+        T tMin = __shfl_down_sync(mask, localMin, 8);
+        T tMax = __shfl_down_sync(mask, localMax, 8);
+        localMin = localMin < tMin ? localMin : tMin;
+        localMax = localMax > tMax ? localMax : tMax;
+    }
+    if(blockSize >= 8){
+        T tMin = __shfl_down_sync(mask, localMin, 4);
+        T tMax = __shfl_down_sync(mask, localMax, 4);
+        localMin = localMin < tMin ? localMin : tMin;
+        localMax = localMax > tMax ? localMax : tMax;
+    } 
+    if(blockSize >= 4){
+        T tMin = __shfl_down_sync(mask, localMin, 2);
+        T tMax = __shfl_down_sync(mask, localMax, 2);
+        localMin = localMin < tMin ? localMin : tMin;
+        localMax = localMax > tMax ? localMax : tMax;
+    } 
+    if(blockSize >= 2){
+        T tMin = __shfl_down_sync(mask, localMin, 1);
+        T tMax = __shfl_down_sync(mask, localMax, 1);
+        localMin = localMin < tMin ? localMin : tMin;
+        localMax = localMax > tMax ? localMax : tMax;
+    } 
+}
+
+template<typename T, size_t blockSize>
 __global__ void 
 maxMinBlockReduce(const void* input, const size_t chunkCount, void* output, const size_t compChunkCount){
-    extern __shared__  unsigned char smem[];
+    // extern __shared__  unsigned char smem[];
+    __shared__ T smem[2 * blockSize];
 
-    T* sharedMem = reinterpret_cast<T*>(smem);
+
+    // T* sharedMem = reinterpret_cast<T*>(smem);
+    T* sharedMem = smem;
 
 
     T* inputbuff = (T*)input;
@@ -134,7 +137,7 @@ maxMinBlockReduce(const void* input, const size_t chunkCount, void* output, cons
     int tid = threadIdx.x;
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     int idy = blockIdx.y * blockDim.y + threadIdx.y;
-    const int blockSize = blockDim.x;
+    // const int blockSize = blockDim.x;
 
 
     T localMin = getInfinity<T>();
@@ -229,7 +232,7 @@ template <typename T>
 __global__ void InitMinMax(void* input, const size_t chunkCount, const size_t numChunk){
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     uint8_t* inputbuff = (uint8_t*) input;
-    if(idx < chunkCount * numChunk){
+    if(idx < numChunk){
         __store_float(reinterpret_cast<T *>(inputbuff + idx * chunkCount), getInfinity<T>());
         __store_float(reinterpret_cast<T *>(inputbuff + idx * chunkCount + sizeof(T)), -getInfinity<T>());
     }
@@ -293,14 +296,18 @@ void minMaxReduction(const void* input, const size_t chunkCount, void* output, c
     const size_t numChunks, ncclDataType_t datatype, cudaStream_t stream){
     int InitBlock = numChunks < 1024? numChunks: 1024;
     int InitGrid = DIVUP(numChunks, InitBlock);
+
     int block = chunkCount < 1024 ? chunkCount : 1024;
-    dim3 grid(DIVUP(chunkCount, block), numChunks);
+    // dim3 grid(DIVUP(chunkCount, 32 * block), numChunks);
+    // dim3 grid(1024, numChunks);
+
+    dim3 grid(128, numChunks);
 
     if(datatype == ncclDataType_t::ncclFloat16){
         
     } else if(datatype == ncclDataType_t::ncclFloat32){
         InitMinMax<float> <<<InitGrid, InitBlock, 0, stream>>> (output, outputChunkCount, numChunks);
-        maxMinBlockReduce<float> <<<grid, block, 2 * block * sizeof(float), stream>>> (input, chunkCount, output, outputChunkCount);
+        maxMinBlockReduce<float, 1024> <<<grid, block, 0, stream>>> (input, chunkCount, output, outputChunkCount);
     }
 }
 
