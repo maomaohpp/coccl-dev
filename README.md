@@ -182,7 +182,7 @@ To switch from the NCCL library to the COCCL library, follow the steps below:
    
      The output should now resolve `libnccl.so.2` to the COCCL-provided library or to the original path that has been replaced by the COCCL library.
    
-3. For running scripts, see [training examples](examples/training_scripts) for details.
+3. For runing script, you can see [trianing examples](examples/training_scripts) for detail.
 
 
 ## Performance
